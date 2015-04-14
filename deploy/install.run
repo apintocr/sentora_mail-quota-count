@@ -1,0 +1,44 @@
+<?php
+/**
+ *
+ * Installer for Mail Quota Count for Sentora 1.0.0
+ * Version : 100
+ */
+
+require_once('cnf/db.php');
+require_once('dryden/db/driver.class.php');
+require_once('dryden/debug/logger.class.php');
+require_once('dryden/runtime/dataobject.class.php');
+require_once('dryden/sys/versions.class.php');
+require_once('dryden/ctrl/options.class.php');
+require_once('dryden/ctrl/auth.class.php');
+require_once('dryden/ctrl/users.class.php');
+require_once('dryden/fs/director.class.php');
+require_once('inc/dbc.inc.php');
+require_once('dryden/fs/filehandler.class.php');
+
+
+//install
+installModule();
+
+function installModule(){
+    global $zdbh;
+
+    // Create Table to Track Mail Quota
+	$sql = $zdbh->prepare("CREATE TABLE IF NOT EXISTS x_mailusage (
+		record_id bigint(20) NOT NULL AUTO_INCREMENT,
+		ac_user_vc varchar(20) NOT NULL,
+		mailusage bigint(20) NOT NULL,
+		webusage bigint(20) NOT NULL,
+		PRIMARY KEY (record_id))
+		ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+	$sql->execute();
+
+	// Transfer Existing User Account to created Table
+	$sql = $zdbh->prepare("INSERT INTO x_mailusage (ac_user_vc)
+		SELECT x_accounts.ac_user_vc
+		FROM x_accounts;");
+	$sql->execute();
+
+}
+?>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<module>
+    <name>Mail Quota Count</name>
+    <version>100</version>
+    <defaultcat>Advanced</defaultcat>
+    <desc>Makes Mail Box usage count as the general Disk Quota for that Account.</desc>
+    <authorname>António Pinto</authorname>
+    <authoremail>apinto@numeroserabiscos.com</authoremail>
+    <authorurl>http://numeroserabiscos.com/</authorurl>
+    <updateurl>http://store.sentora.org/version.xml</updateurl>
+</module>
