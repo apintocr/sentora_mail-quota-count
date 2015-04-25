@@ -7,5 +7,6 @@ On the Terminal (SSH to your server) type:
     zppy repo add repo.vanguardly.com/sentora
     zppy install mail-quota-count
 
-### This is a very earlier version with little testing.
-### Use at your own risk.
+### Tested And Working :)
+#### Issues:
+When Uninstalling does not remove the x_mailusage table; this should not create any kind of issues.
