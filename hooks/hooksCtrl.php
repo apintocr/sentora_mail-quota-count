@@ -3,6 +3,7 @@ namespace vanguardly\mail_quota_count;
 
 use fs_filehandler;
 use fs_director;
+use ctrl_options; // ??
 use ctrl_users;
 use PDO;
 
@@ -44,7 +45,7 @@ class Controller
             $mailusagers->bindParam(':ac_user_vc', $userdir['ac_user_vc']);
             $mailusagers->execute();
             if ($mailuse = $mailusagers->fetch()) {
-                    $size = $mailuse['mailusage'] + $mailuse['webusage'];
+                $size = $mailuse['mailusage'] + $mailuse['webusage'];
 
             } else {
                 $size = 0;
@@ -108,16 +109,30 @@ class Controller
 
     public function checkQuotas()
     {
-        global $zdbh;
-
+        global $zdbh, $controller;
 
         echo fs_filehandler::NewLine() .
             "Mail Quota Count Checking Disk and Mail usage..."
             . fs_filehandler::NewLine();
 
-        $vmailpath = "/var/sentora/vmail";    // Path to vmail
-        $hd_path   = "/var/sentora/hostdata"; // Path to hostdata
+        if (php_uname('s') == 'Windows NT') {
+            // Path on Windows
+            $vmailpath = "c:/zpanel/bin/hmailserver/data/";
+        } else {
+            // Path on Unix
+            $vmailpath = "/var/sentora/vmail";
+        }
 
+        $hd_path   = ctrl_options::GetOption('hosted_dir'); // Path to hostdata
+
+        /*
+         * DEBUG
+         * Uncomment below to echo the variables.
+         * Run Daemon: php -q /etc/sentora/panel/bin/daemon.php
+         *
+         */
+        echo fs_filehandler::NewLine() . "hd_path"   . $hd_path . fs_filehandler::NewLine();
+        echo fs_filehandler::NewLine() . "vmailpath" . $vmailpath . fs_filehandler::NewLine();
 
         $acc = $zdbh->query("SELECT ac_id_pk,ac_user_vc FROM x_accounts WHERE ISNULL(ac_deleted_ts)");
 
@@ -144,9 +159,22 @@ class Controller
         $mailusage = array();
 
         foreach ($domain as $k => $v) {
-            @exec("du -c -b ".$vmailpath."/".$k, $output);
-            $use = explode("\t", array_pop($output));
-            @$mailusage[$v] += $use[0];
+
+            if (php_uname('s') == 'Windows NT') {
+                if (fs_director::CheckFolderExists($vmailpath."/".$k)) {
+                    $size = fs_director::GetDirectorySize($vmailpath."/".$k);
+                } else {
+                    $size = 0;
+                }
+               @$mailusage[$v] += $size;
+
+            } else {
+                @exec("du -c -b ".$vmailpath."/".$k, $output);
+                $use = explode("\t", array_pop($output));
+               @$mailusage[$v] += $use[0];
+
+            }
+
         }
 
         foreach ($mailusage as $k => $v) {
@@ -157,10 +185,24 @@ class Controller
         $hdusage = array();
 
         foreach ($by_id as $k => $v) {
-            @exec("du -c -b ".$hd_path."/".$v, $output);
-            $use = explode("\t", array_pop($output));
-            @$hdusage[$v] += $use[0];
+
+            if (php_uname('s') == 'Windows NT') {
+                if (fs_director::CheckFolderExists($hd_path."/".$k)) {
+                    $size = fs_director::GetDirectorySize($hd_path."/".$k);
+                } else {
+                    $size = 0;
+                }
+               @$hdusage[$v] += $size;
+
+            } else {
+                @exec("du -c -b ".$hd_path."/".$k, $output);
+                $use = explode("\t", array_pop($output));
+               @$hdusage[$v] += $use[0];
+
+            }
         }
+
+
 
         foreach ($hdusage as $k => $v) {
             $zdbh->query('UPDATE x_mailusage SET webusage='.$v.' WHERE ac_user_vc="'.$k.'"');
