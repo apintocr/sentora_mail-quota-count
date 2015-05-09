@@ -195,9 +195,10 @@ class Controller
                @$hdusage[$v] += $size;
 
             } else {
-                @exec("du -c -b ".$hd_path."/".$k, $output);
+                echo "A";
+                @exec("du -c -b ".$hd_path.$v, $output);
                 $use = explode("\t", array_pop($output));
-               @$hdusage[$v] += $use[0];
+                @$hdusage[$v] += $use[0];
 
             }
         }
