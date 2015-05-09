@@ -117,7 +117,7 @@ class Controller
 
         if (php_uname('s') == 'Windows NT') {
             // Path on Windows
-            $vmailpath = "c:/zpanel/bin/hmailserver/data/";
+            $vmailpath = "c:/zpanel/bin/hmailserver/data";
         } else {
             // Path on Unix
             $vmailpath = "/var/sentora/vmail";
